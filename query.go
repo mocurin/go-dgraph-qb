@@ -13,7 +13,7 @@ type Query interface {
 
 type Q struct {
 	Name  string
-	Args  []Argument
+	Args  []NamedArgument
 	Dirs  []Directive
 	Preds []Predicate
 }
@@ -27,7 +27,7 @@ func (q *Q) ComposeQuery(minified bool) (lines []string, summary build.BuildSumm
 	}
 
 	// Compose query arguments
-	args, _, err := ComposeArgs(q.Args, minified)
+	args, _, err := ComposeNamedArgs(q.Args, minified)
 
 	if err != nil {
 		return
@@ -81,17 +81,19 @@ func (q *Q) ComposeQuery(minified bool) (lines []string, summary build.BuildSumm
 	lines = make([]string, 0, len(args)+len(preds)+3)
 
 	lines = append(lines, q.Name+"(\n")
-	lines = append(lines, Identate(args)...)
+	lines = append(lines, Indentate(args)...)
 
-	if len(dirs) != 0 {
-		dirs := dirs[0]
-
-		lines = append(lines, ") ", dirs, " {\n")
-	} else {
+	if len(dirs) == 0 {
 		lines = append(lines, ") {")
+	} else {
+		dirs[0] = ") " + dirs[0]
+
+		dirs[len(dirs)-1] += " {\n"
+
+		lines = append(lines, dirs...)
 	}
 
-	lines = append(lines, Identate(preds)...)
+	lines = append(lines, Indentate(preds)...)
 	lines = append(lines, "}\n")
 
 	return

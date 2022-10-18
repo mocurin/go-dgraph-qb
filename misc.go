@@ -1,12 +1,12 @@
 package gdqb
 
-var Ident string = ""
+var Indent string = "  "
 
-func Identate(lines []string) []string {
-	identated := make([]string, 0, len(lines))
+func Indentate(lines []string) []string {
+	indentated := make([]string, 0, len(lines))
 	for _, line := range lines {
-		identated = append(identated, Ident+line)
+		indentated = append(indentated, Indent+line)
 	}
 
-	return identated
+	return indentated
 }

@@ -106,7 +106,7 @@ func (pn *PN) ComposePredicate(minified bool) (lines []string, summary build.Bui
 	if minified {
 		preds := preds[0]
 
-		lines = append(lines, " { ", preds, " }")
+		lines = append(lines, "{ ", preds, " }")
 		lines = []string{strings.Join(lines, "")}
 
 		return
@@ -114,8 +114,8 @@ func (pn *PN) ComposePredicate(minified bool) (lines []string, summary build.Bui
 
 	lines = append(lines, " {\n")
 	lines = []string{strings.Join(lines, "")}
-	lines = append(lines, Identate(preds)...)
-	lines = append(lines, "}\n")
+	lines = append(lines, Indentate(preds)...)
+	lines = append(lines, "}")
 
 	return
 }

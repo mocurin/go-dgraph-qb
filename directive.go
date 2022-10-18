@@ -1,9 +1,11 @@
 package gdqb
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/mocurin/go-dgraph-qb/build"
+	"github.com/mocurin/go-dgraph-qb/dqld"
 )
 
 type Directive interface {
@@ -25,20 +27,63 @@ func ComposeDirs(dirs []Directive, minified bool) (lines []string, summary build
 			return
 		}
 
+		// Merge last & first lines in composed directive
+		if !minified {
+			if len(composed) != 0 {
+				last := len(composed) - 1
+
+				composed[last] = fmt.Sprintf("%s %s", composed[last], dir[0])
+				dir = dir[1:]
+			}
+		}
+
 		composed = append(composed, dir...)
 	}
 
-	// Do not add empty string in case got no directives
-	if len(composed) == 0 {
+	if minified {
+		line := strings.Join(composed, " ")
+
+		lines = []string{line}
+
 		return
 	}
 
-	// Directives can not be compose in non-minfied way
-	line := strings.Join(composed, " ")
-
-	lines = []string{line}
+	lines = composed
 
 	return
 }
 
-type D struct{}
+type D struct {
+	Type dqld.DirectiveType
+	Args []Argument
+}
+
+func (d *D) ComposeDirective(minified bool) (lines []string, summary build.BuildSummary, err error) {
+	lines = []string{fmt.Sprintf("@%s", d.Type)}
+
+	if len(d.Args) == 0 {
+		return
+	}
+
+	args, _, err := ComposeArgs(d.Args, minified)
+
+	if err != nil {
+		return
+	}
+
+	if minified {
+		lines = append(lines, "(", args[0], ")")
+
+		line := strings.Join(lines, "")
+
+		lines = []string{line}
+
+		return
+	}
+
+	lines[0] += "(\n"
+	lines = append(lines, Indentate(args)...)
+	lines = append(lines, ")")
+
+	return
+}
